@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+</head>
+
+<body>
+    <h1>Enter Payment Details</h1>
+    <form id="paymentDetailsForm">
+        <label for="cardNumber">Card Number:</label>
+        <input type="text" id="cardNumber" name="cardNumber" required><br>
+
+        <label for="expiryDate">Expiry Date:</label>
+        <input type="text" id="expiryDate" name="expiryDate" required><br>
+
+        <label for="cvv">CVV:</label>
+        <input type="text" id="cvv" name="cvv" required><br>
+
+        <button type="button" onclick="confirmPayment()">Confirm Payment</button>
+    </form>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const cartID = urlParams.get('cartID');
+
+        function confirmPayment() {
+            const cardNumber = document.getElementById('cardNumber').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+            const cvv = document.getElementById('cvv').value;
+            const token = localStorage.getItem('jwtToken');
+
+            const paymentDetails = {
+                cartID: cartID,
+                cardNumber: cardNumber,
+                expiryDate: expiryDate,
+                cvv: cvv,
+            };
+
+            fetch('http://localhost:8081/confirm-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(paymentDetails)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.message === 'Payment successful') {
+                    window.location.href = 'http://localhost:8080/carts.html';  // Redirect back to carts page
+                }
+            })
+            .catch(error => {
+                console.error('Error confirming payment:', error);
+            });
+        }
+    </script>
+</body>
+
+</html>
